@@ -131,19 +131,20 @@ class DatabaseManager:
             con.execute("CREATE INDEX IF NOT EXISTS idx_alerts_dedup ON alert_events (dedup_key);")
             con.execute("CREATE INDEX IF NOT EXISTS idx_freshness_dataset ON dataset_freshness_metrics (dataset_id, as_of_time);")
 
-    def upsert_batches(self, records: List[DatasetBatchRecord]) -> int:
-        """Idempotently insert or update curated batch records."""
+    def upsert_batches(self, records: List[DatasetBatchRecord], chunk_size: int = 5000) -> int:
+        """Idempotently insert or update curated batch records in chunks."""
         if not records:
             return 0
 
         with self.get_connection() as con:
             con.execute("BEGIN TRANSACTION;")
             try:
-                # Use staging table pattern for atomic idempotent merge
                 batch_ids = [r.batch_id for r in records]
-                # Delete existing records matching these batch_ids to prevent duplicates
-                placeholders = ", ".join(["?"] * len(batch_ids))
-                con.execute(f"DELETE FROM curated_batches WHERE batch_id IN ({placeholders});", batch_ids)
+                # Chunked deletion to avoid exceeding SQL parameter limits on 100k+ records
+                for i in range(0, len(batch_ids), chunk_size):
+                    chunk_ids = batch_ids[i:i + chunk_size]
+                    placeholders = ", ".join(["?"] * len(chunk_ids))
+                    con.execute(f"DELETE FROM curated_batches WHERE batch_id IN ({placeholders});", chunk_ids)
 
                 insert_sql = """
                     INSERT INTO curated_batches (
@@ -154,25 +155,29 @@ class DatabaseManager:
                         is_sla_breached, source_file, producer_id, ingestion_run_id, processed_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """
-                tuples = [
-                    (
-                        r.batch_id, r.dataset_id, r.schedule_interval_start, r.schedule_interval_end,
-                        r.expected_arrival_time, r.actual_arrival_time, r.actual_completion_time,
-                        r.max_event_timestamp, r.row_count, r.bytes_size, r.status, r.arrival_delay_seconds,
-                        r.is_late_arrival, r.pipeline_duration_seconds, r.sla_completion_deadline,
-                        r.is_sla_breached, r.source_file, r.producer_id, r.ingestion_run_id, r.processed_at
-                    )
-                    for r in records
-                ]
-                con.executemany(insert_sql, tuples)
+
+                for i in range(0, len(records), chunk_size):
+                    chunk = records[i:i + chunk_size]
+                    tuples = [
+                        (
+                            r.batch_id, r.dataset_id, r.schedule_interval_start, r.schedule_interval_end,
+                            r.expected_arrival_time, r.actual_arrival_time, r.actual_completion_time,
+                            r.max_event_timestamp, r.row_count, r.bytes_size, r.status, r.arrival_delay_seconds,
+                            r.is_late_arrival, r.pipeline_duration_seconds, r.sla_completion_deadline,
+                            r.is_sla_breached, r.source_file, r.producer_id, r.ingestion_run_id, r.processed_at
+                        )
+                        for r in chunk
+                    ]
+                    con.executemany(insert_sql, tuples)
+
                 con.execute("COMMIT;")
                 return len(records)
             except Exception:
                 con.execute("ROLLBACK;")
                 raise
 
-    def upsert_alerts(self, alerts: List[AlertEvent]) -> int:
-        """Idempotently insert alerts using dedup_key."""
+    def upsert_alerts(self, alerts: List[AlertEvent], chunk_size: int = 5000) -> int:
+        """Idempotently insert alerts using dedup_key in chunks."""
         if not alerts:
             return 0
 
@@ -180,8 +185,10 @@ class DatabaseManager:
             con.execute("BEGIN TRANSACTION;")
             try:
                 alert_ids = [a.alert_id for a in alerts]
-                placeholders = ", ".join(["?"] * len(alert_ids))
-                con.execute(f"DELETE FROM alert_events WHERE alert_id IN ({placeholders});", alert_ids)
+                for i in range(0, len(alert_ids), chunk_size):
+                    chunk_ids = alert_ids[i:i + chunk_size]
+                    placeholders = ", ".join(["?"] * len(chunk_ids))
+                    con.execute(f"DELETE FROM alert_events WHERE alert_id IN ({placeholders});", chunk_ids)
 
                 insert_sql = """
                     INSERT INTO alert_events (
@@ -190,24 +197,28 @@ class DatabaseManager:
                         recommended_action, owner_team, dedup_key, triggered_at, run_id
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """
-                tuples = [
-                    (
-                        a.alert_id, a.dataset_id, a.alert_type.value, a.severity.value, a.status.value,
-                        a.schedule_interval_start, a.expected_time, a.actual_time, a.delay_minutes,
-                        a.alert_title, a.alert_message, a.recommended_action, a.owner_team,
-                        a.dedup_key, a.triggered_at, a.run_id
-                    )
-                    for a in alerts
-                ]
-                con.executemany(insert_sql, tuples)
+
+                for i in range(0, len(alerts), chunk_size):
+                    chunk = alerts[i:i + chunk_size]
+                    tuples = [
+                        (
+                            a.alert_id, a.dataset_id, a.alert_type.value, a.severity.value, a.status.value,
+                            a.schedule_interval_start, a.expected_time, a.actual_time, a.delay_minutes,
+                            a.alert_title, a.alert_message, a.recommended_action, a.owner_team,
+                            a.dedup_key, a.triggered_at, a.run_id
+                        )
+                        for a in chunk
+                    ]
+                    con.executemany(insert_sql, tuples)
+
                 con.execute("COMMIT;")
                 return len(alerts)
             except Exception:
                 con.execute("ROLLBACK;")
                 raise
 
-    def insert_quarantine(self, records: List[QuarantineRecord]) -> int:
-        """Insert quarantined records idempotently."""
+    def insert_quarantine(self, records: List[QuarantineRecord], chunk_size: int = 5000) -> int:
+        """Insert quarantined records idempotently in chunks."""
         if not records:
             return 0
 
@@ -215,8 +226,10 @@ class DatabaseManager:
             con.execute("BEGIN TRANSACTION;")
             try:
                 q_ids = [q.quarantine_id for q in records]
-                placeholders = ", ".join(["?"] * len(q_ids))
-                con.execute(f"DELETE FROM quarantine_records WHERE quarantine_id IN ({placeholders});", q_ids)
+                for i in range(0, len(q_ids), chunk_size):
+                    chunk_ids = q_ids[i:i + chunk_size]
+                    placeholders = ", ".join(["?"] * len(chunk_ids))
+                    con.execute(f"DELETE FROM quarantine_records WHERE quarantine_id IN ({placeholders});", chunk_ids)
 
                 insert_sql = """
                     INSERT INTO quarantine_records (
@@ -224,19 +237,24 @@ class DatabaseManager:
                         reject_code, reject_reason, rejected_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 """
-                tuples = [
-                    (
-                        q.quarantine_id, q.run_id, q.source_file, q.line_number,
-                        q.raw_record, q.reject_code.value, q.reject_reason, q.rejected_at
-                    )
-                    for q in records
-                ]
-                con.executemany(insert_sql, tuples)
+
+                for i in range(0, len(records), chunk_size):
+                    chunk = records[i:i + chunk_size]
+                    tuples = [
+                        (
+                            q.quarantine_id, q.run_id, q.source_file, q.line_number,
+                            q.raw_record, q.reject_code.value, q.reject_reason, q.rejected_at
+                        )
+                        for q in chunk
+                    ]
+                    con.executemany(insert_sql, tuples)
+
                 con.execute("COMMIT;")
                 return len(records)
             except Exception:
                 con.execute("ROLLBACK;")
                 raise
+
 
     def upsert_freshness_metrics(self, metrics: List[DatasetFreshnessMetric]) -> int:
         """Insert freshness metric snapshots."""
