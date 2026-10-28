@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sla-freshness-sentinel"
+version = "1.0.0"
+description = "Production-grade SLA, Arrival Time, and Freshness Tracking Pipeline with Automated Alerting"
+readme = "README.md"
+authors = [{ name = "Data Engineering Team" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb>=1.1.0",
+    "pydantic>=2.8.0",
+    "pyyaml>=6.0.0",
+    "rich>=13.7.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+sla-sentinel = "src.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = "-v --strict-markers"
+

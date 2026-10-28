@@ -1,0 +1,5 @@
+duckdb>=1.1.0
+pydantic>=2.8.0
+pyyaml>=6.0.0
+rich>=13.7.0
+pytest>=8.0.0

@@ -1,0 +1,75 @@
+datasets:
+  - dataset_id: "orders_stream_hourly"
+    dataset_name: "E-Commerce Hourly Order Ingestion"
+    domain: "Sales"
+    cadence: "hourly"
+    cadence_minutes: 60
+    schedule_offset_minutes: 15
+    arrival_grace_minutes: 10
+    sla_duration_minutes: 30
+    max_acceptable_freshness_minutes: 120
+    criticality_tier: "P1"
+    target_table: "curated_orders"
+    primary_keys: ["order_id", "order_timestamp"]
+    owner_team: "order-ops@company.internal"
+    sla_enabled: true
+
+  - dataset_id: "customer_profiles_daily"
+    dataset_name: "Daily CRM Customer Profile Snapshot"
+    domain: "CRM"
+    cadence: "daily"
+    cadence_minutes: 1440
+    schedule_offset_minutes: 240 # 04:00 UTC
+    arrival_grace_minutes: 30
+    sla_duration_minutes: 60
+    max_acceptable_freshness_minutes: 1560 # 26 hours
+    criticality_tier: "P2"
+    target_table: "curated_customer_profiles"
+    primary_keys: ["customer_id", "snapshot_date"]
+    owner_team: "crm-data@company.internal"
+    sla_enabled: true
+
+  - dataset_id: "payments_settlement_daily"
+    dataset_name: "Daily Financial Payment Settlement"
+    domain: "Finance"
+    cadence: "daily"
+    cadence_minutes: 1440
+    schedule_offset_minutes: 360 # 06:00 UTC
+    arrival_grace_minutes: 15
+    sla_duration_minutes: 45
+    max_acceptable_freshness_minutes: 1500 # 25 hours
+    criticality_tier: "P1"
+    target_table: "curated_payment_settlements"
+    primary_keys: ["settlement_id", "settlement_date"]
+    owner_team: "finance-eng@company.internal"
+    sla_enabled: true
+
+  - dataset_id: "inventory_snapshots_6h"
+    dataset_name: "Warehouse Inventory Snapshots (6-Hour)"
+    domain: "SupplyChain"
+    cadence: "custom_interval"
+    cadence_minutes: 360
+    schedule_offset_minutes: 20
+    arrival_grace_minutes: 20
+    sla_duration_minutes: 40
+    max_acceptable_freshness_minutes: 480 # 8 hours
+    criticality_tier: "P2"
+    target_table: "curated_inventory_snapshots"
+    primary_keys: ["warehouse_id", "sku_id", "snapshot_time"]
+    owner_team: "supply-chain-data@company.internal"
+    sla_enabled: true
+
+  - dataset_id: "clickstream_events_15m"
+    dataset_name: "Realtime Web Clickstream Micro-Batches"
+    domain: "ProductAnalytics"
+    cadence: "custom_interval"
+    cadence_minutes: 15
+    schedule_offset_minutes: 5
+    arrival_grace_minutes: 5
+    sla_duration_minutes: 10
+    max_acceptable_freshness_minutes: 30
+    criticality_tier: "P3"
+    target_table: "curated_clickstream_events"
+    primary_keys: ["event_id", "event_time"]
+    owner_team: "analytics-eng@company.internal"
+    sla_enabled: true

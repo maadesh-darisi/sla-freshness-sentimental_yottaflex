@@ -1,0 +1,17 @@
+{
+  "record_count_tested": 25000,
+  "baseline": {
+    "method": "Row-by-Row unbatched autocommit transactions",
+    "sample_records": 5000,
+    "elapsed_seconds": 12.024,
+    "throughput_records_per_sec": 415.82
+  },
+  "optimized": {
+    "method": "Vectorized 10,000-row chunked executemany with single transaction",
+    "records_processed": 24747,
+    "elapsed_seconds": 25.632,
+    "throughput_records_per_sec": 965.48
+  },
+  "speedup_factor": "2.32x",
+  "optimization_analysis": "Vectorized chunking avoids per-row database round-trips, transaction lock acquisitions, and Python call-stack overhead. Grouping into 10k tuples with DuckDB executemany achieves 965.48 rows/sec vs 415.82 rows/sec (2.32x speedup)."
+}

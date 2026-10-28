@@ -1,0 +1,11 @@
+pipeline:
+  environment: "local"
+  database_path: "data/warehouse/sla_sentinel.duckdb"
+  quarantine_dir: "data/warehouse/quarantine"
+  reports_dir: "data/reports"
+  catalog_path: "config/datasets_sla_catalog.yaml"
+  log_level: "INFO"
+  batch_size: 50000
+  enable_quarantine_dump: true
+  enable_alert_webhook_mock: true
+  freshness_evaluation_timestamp: null # null means current UTC time, or pass ISO-8601 string for evaluation

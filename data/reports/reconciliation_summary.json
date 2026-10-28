@@ -1,0 +1,167 @@
+{
+  "run_id": "run_20261028_021702_557a4509",
+  "pipeline_status": "PARTIAL_SUCCESS",
+  "execution_duration_sec": 12.1236,
+  "input_records_count": 10000,
+  "valid_records_count": 9895,
+  "quarantined_records_count": 105,
+  "curated_records_in_db": 9895,
+  "quarantine_records_in_db": 105,
+  "conservation_equation_passed": true,
+  "conservation_discrepancy": 0,
+  "primary_key_duplicates_curated": 0,
+  "primary_key_duplicates_alerts": 0,
+  "referential_integrity_violations": 0,
+  "dataset_aggregates": [
+    {
+      "dataset_id": "clickstream_events_15m",
+      "total_batches": 1971,
+      "total_rows": 45551087,
+      "late_batches": 142,
+      "breached_batches": 37,
+      "avg_delay_min": 3.67
+    },
+    {
+      "dataset_id": "customer_profiles_daily",
+      "total_batches": 2015,
+      "total_rows": 47637131,
+      "late_batches": 137,
+      "breached_batches": 47,
+      "avg_delay_min": 13.27
+    },
+    {
+      "dataset_id": "inventory_snapshots_6h",
+      "total_batches": 1964,
+      "total_rows": 47250000,
+      "late_batches": 143,
+      "breached_batches": 39,
+      "avg_delay_min": 9.69
+    },
+    {
+      "dataset_id": "orders_stream_hourly",
+      "total_batches": 1972,
+      "total_rows": 47792721,
+      "late_batches": 141,
+      "breached_batches": 37,
+      "avg_delay_min": 5.27
+    },
+    {
+      "dataset_id": "payments_settlement_daily",
+      "total_batches": 1981,
+      "total_rows": 46624441,
+      "late_batches": 149,
+      "breached_batches": 44,
+      "avg_delay_min": 7.28
+    }
+  ],
+  "alerts_summary": [
+    {
+      "alert_type": "LATE_ARRIVAL",
+      "severity": "CRITICAL",
+      "count": 158
+    },
+    {
+      "alert_type": "LATE_ARRIVAL",
+      "severity": "WARNING",
+      "count": 259
+    },
+    {
+      "alert_type": "MISSING_LOAD",
+      "severity": "CRITICAL",
+      "count": 74
+    },
+    {
+      "alert_type": "MISSING_LOAD",
+      "severity": "WARNING",
+      "count": 356
+    },
+    {
+      "alert_type": "SLA_BREACH",
+      "severity": "CRITICAL",
+      "count": 120
+    },
+    {
+      "alert_type": "SLA_BREACH",
+      "severity": "WARNING",
+      "count": 37
+    },
+    {
+      "alert_type": "STALE_DATA",
+      "severity": "WARNING",
+      "count": 4
+    }
+  ],
+  "freshness_summary": [
+    {
+      "dataset_id": "clickstream_events_15m",
+      "freshness_status": "CRITICAL_STALE",
+      "freshness_lag_minutes": 14400.0,
+      "max_acceptable_minutes": 30.0,
+      "is_sla_breached": true
+    },
+    {
+      "dataset_id": "clickstream_events_15m",
+      "freshness_status": "CRITICAL_STALE",
+      "freshness_lag_minutes": 1425.23,
+      "max_acceptable_minutes": 30.0,
+      "is_sla_breached": true
+    },
+    {
+      "dataset_id": "customer_profiles_daily",
+      "freshness_status": "FRESH",
+      "freshness_lag_minutes": 271.0,
+      "max_acceptable_minutes": 1560.0,
+      "is_sla_breached": false
+    },
+    {
+      "dataset_id": "customer_profiles_daily",
+      "freshness_status": "FRESH",
+      "freshness_lag_minutes": 0.0,
+      "max_acceptable_minutes": 1560.0,
+      "is_sla_breached": false
+    },
+    {
+      "dataset_id": "inventory_snapshots_6h",
+      "freshness_status": "CRITICAL_STALE",
+      "freshness_lag_minutes": 14400.0,
+      "max_acceptable_minutes": 480.0,
+      "is_sla_breached": true
+    },
+    {
+      "dataset_id": "inventory_snapshots_6h",
+      "freshness_status": "CRITICAL_STALE",
+      "freshness_lag_minutes": 1080.0,
+      "max_acceptable_minutes": 480.0,
+      "is_sla_breached": true
+    },
+    {
+      "dataset_id": "orders_stream_hourly",
+      "freshness_status": "FRESH",
+      "freshness_lag_minutes": 95.0,
+      "max_acceptable_minutes": 120.0,
+      "is_sla_breached": false
+    },
+    {
+      "dataset_id": "orders_stream_hourly",
+      "freshness_status": "FRESH",
+      "freshness_lag_minutes": 0.0,
+      "max_acceptable_minutes": 120.0,
+      "is_sla_breached": false
+    },
+    {
+      "dataset_id": "payments_settlement_daily",
+      "freshness_status": "FRESH",
+      "freshness_lag_minutes": 151.0,
+      "max_acceptable_minutes": 1500.0,
+      "is_sla_breached": false
+    },
+    {
+      "dataset_id": "payments_settlement_daily",
+      "freshness_status": "FRESH",
+      "freshness_lag_minutes": 0.0,
+      "max_acceptable_minutes": 1500.0,
+      "is_sla_breached": false
+    }
+  ],
+  "generated_at": "2026-10-28T02:17:14.530179+00:00"
+}
