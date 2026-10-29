@@ -34,5 +34,6 @@ htmlcov/
 # Local database and raw large files (keep sample data)
 data/warehouse/*.duckdb
 data/warehouse/*.duckdb.wal
+data/warehouse/quarantine/*.jsonl
 data/raw/large_batches*.jsonl
 data/raw/benchmark_input.jsonl
